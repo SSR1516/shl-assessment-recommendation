@@ -1,19 +1,38 @@
-# AI-based SHL Assessment Recommendation System
+# AI-based SHL Assessment Recommendation System 🚀
 
 An end-to-end **AI-powered recommendation system** that helps recruiters identify the most relevant SHL assessments based on natural language hiring requirements.
 
-This project was built as part of the **SHL AI Intern – Recommendation Engine (Generative AI) Assignment** and closely follows the problem statement, evaluation methodology, and expected deliverables described in the official PDF.
+This project was built as part of the **SHL AI Intern – Recommendation Engine (Generative AI) Assignment** and strictly follows the problem statement, evaluation methodology, and deliverables mentioned in the official SHL PDF.
+
+---
+
+## 🌐 Live Demo
+
+- 🚀 **Streamlit Application (Recruiter UI)**  
+  https://shl-assessment.streamlit.app
+
+- ⚙️ **FastAPI Backend (Swagger Docs)**  
+  https://shl-backend.onrender.com/docs
+
+> Recruiters can directly open the app, enter a hiring query, and view recommended SHL assessments without any local setup.
 
 ---
 
 ## 🚀 What This Project Does
 
-Recruiters often struggle to select the right assessments from SHL’s large catalog. This system solves that by:
+Recruiters often struggle to choose the correct assessments from SHL’s large catalog.  
+This system solves that problem by:
 
-* Scraping and structuring SHL assessment data
-* Accepting **natural language hiring queries** (e.g., *"Hiring Java developers with communication skills"*)
-* Recommending the **most relevant SHL assessments**
-* Evaluating recommendations using **Recall@K** on the provided dataset
+- Scraping and structuring SHL assessment data
+- Accepting **natural language hiring queries**
+- Recommending the **most relevant SHL assessments**
+- Evaluating results using **Recall@K**
+
+Example query:
+Hiring Java developers with strong communication skills
+
+yaml
+Copy code
 
 ---
 
@@ -21,190 +40,168 @@ Recruiters often struggle to select the right assessments from SHL’s large cat
 
 ![System Architecture](docs/system_architecture.png)
 
-**High-level flow:**
+### High-Level Flow
+1. SHL catalog is scraped and structured
+2. Data is cleaned and stored locally
+3. Recruiter submits a natural language query
+4. Recommendation engine ranks assessments
+5. FastAPI returns ranked results
+6. Streamlit UI displays recommendations
 
-1. SHL assessment data is scraped and stored locally
-2. Data is cleaned and processed
-3. A recommendation engine ranks assessments based on query relevance
-4. FastAPI exposes the recommendation API
-5. Streamlit provides an interactive recruiter-facing UI
+The system is intentionally divided into **three clean layers**:
+- Frontend (Streamlit)
+- Backend (FastAPI)
+- Data & Evaluation Layer
 
 ---
 
 ## 📁 Project Structure
 
-```
+```text
 shl-assessment-recommendation/
 │
-├── backend/            # FastAPI backend & recommender logic
-│   ├── api/            # API routes
+├── backend/
+│   ├── api/            # FastAPI routes
 │   ├── core/           # Recommendation engine
 │   └── utils/          # Helpers & mappings
 │
-├── frontend/           # Streamlit web UI
+├── frontend/           # Streamlit recruiter UI
 │
 ├── scraper/            # SHL catalog web scraper
 │
 ├── data/
 │   ├── raw/            # Raw scraped data
-│   ├── processed/      # Cleaned assessment dataset
+│   ├── processed/      # Cleaned SHL assessments
 │   └── evaluation/     # Train, test & submission files
 │
 ├── experiments/        # Recall@K evaluation scripts
 │
-├── docs/               # Architecture diagram & documentation
+├── docs/               # Architecture diagrams
 │
-├── requirements.txt    # Python dependencies
+├── requirements.txt
 └── README.md
-```
+📊 Data Collection (SHL Scraper)
+Source: SHL Product Catalog
 
----
+Tools: requests, BeautifulSoup
 
-## 📊 Data Collection (SHL Scraper)
-
-* Source: **SHL Product Catalog**
-* Tooling: `requests`, `BeautifulSoup`
-* Output: `data/processed/shl_assessments.csv`
+Output: data/processed/shl_assessments.csv
 
 Each assessment contains:
 
-* Name
-* URL
-* Description
-* Duration (if available)
-* Remote & adaptive support
-* Test type (mapped to SHL categories)
+Name
 
----
+URL
 
-## 🤖 Recommendation Approach
+Description
 
-The recommendation engine uses a **keyword-based relevance scoring approach**:
+Duration (if available)
 
-1. Tokenizes the recruiter query
-2. Matches query terms against assessment names & descriptions
-3. Applies heuristic domain detection (technical vs behavioral)
-4. Ensures **balanced recommendations** when both domains are detected
+Remote & adaptive support
 
-This design prioritizes:
+Test type (mapped to SHL categories)
 
-* Transparency
-* Interpretability
-* Alignment with SHL’s structured assessment taxonomy
+Total assessments scraped: 377
 
----
+🤖 Recommendation Approach
+The recommendation engine uses a transparent, heuristic-based ranking strategy:
 
-## 📈 Evaluation
+Tokenizes the recruiter query
 
-* Metric used: **Recall@10**
-* Dataset: Provided train & test CSV files
-* Script: `experiments/evaluate.py`
+Matches query keywords with assessment name & description
+
+Detects technical vs behavioral intent
+
+Ensures balanced recommendations when both domains are present
+
+Why this approach?
+Fully explainable
+
+Lightweight & fast
+
+Aligns with SHL’s structured taxonomy
+
+Easy to evaluate and reproduce
+
+📈 Evaluation
+Metric: Mean Recall@10
+
+Dataset: SHL-provided train & test CSV files
+
+Script: experiments/evaluate.py
 
 Sample output:
 
-```
+graphql
+Copy code
 Mean Recall@10: 0.0200
-```
+Submission file generated at:
 
-A submission file is generated at:
-
-```
+bash
+Copy code
 data/evaluation/submission.csv
-```
-
----
-
-## 🖥️ How to Run the Project Locally
-
-### 1️⃣ Clone the Repository
-
-```bash
+🖥️ Run the Project Locally
+1️⃣ Clone Repository
+bash
+Copy code
 git clone https://github.com/SSR1516/shl-assessment-recommendation.git
 cd shl-assessment-recommendation
-```
-
----
-
-### 2️⃣ Install Dependencies
-
-```bash
+2️⃣ Install Dependencies
+bash
+Copy code
 pip install -r requirements.txt
-```
-
----
-
-### 3️⃣ Start the Backend (FastAPI)
-
-```bash
+3️⃣ Start Backend (FastAPI)
+bash
+Copy code
 python -m uvicorn backend.api.api:app --reload
-```
+Backend runs at:
 
-Backend will be available at:
-👉 **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
-
----
-
-### 4️⃣ Start the Frontend (Streamlit UI)
-
-```bash
+cpp
+Copy code
+http://127.0.0.1:8000
+4️⃣ Start Frontend (Streamlit)
+bash
+Copy code
 streamlit run frontend/app.py
-```
+Frontend runs at:
 
-🚀 **Open the application here:**
-👉 **[http://localhost:8501](http://localhost:8501)**
+arduino
+Copy code
+http://localhost:8501
+🛠️ Tech Stack
+Python 3.12
 
-> Clicking this link after running Streamlit will automatically open the recruiter UI.
+FastAPI
 
----
+Streamlit
 
-## 🧪 Example Recruiter Query
+Pandas & NumPy
 
-```
-I am hiring Java developers who also need good communication skills
-```
+BeautifulSoup
 
-The system returns:
+Uvicorn
 
-* Assessment name
-* SHL product URL
-* Test type (Knowledge, Ability, Personality, etc.)
-* Remote & adaptive support
+🎯 Key Highlights
+End-to-end working system
 
----
+Live deployed demo for recruiters
 
-## 🛠️ Technologies Used
+Clean modular architecture
 
-* **Python 3.12**
-* **FastAPI** – backend API
-* **Streamlit** – recruiter-facing UI
-* **Pandas / NumPy** – data processing
-* **BeautifulSoup** – web scraping
+Fully compliant with SHL assignment
 
----
+Transparent & explainable logic
 
-## 🎯 Key Highlights
+Reproducible evaluation pipeline
 
-* End-to-end working system
-* Clean modular architecture
-* Matches SHL assignment requirements
-* Transparent, explainable recommendation logic
-* Ready for recruiter or evaluator review
+📌 Note for Reviewers
+Live deployment is provided for easy review
 
----
+Local execution is fully supported
 
-## 📌 Note for Reviewers
+Code is structured, documented, and assignment-aligned
 
-This project is designed to be:
-
-* Easy to understand
-* Easy to run locally
-* Fully aligned with the SHL assessment problem statement
-
-Thank you for reviewing this submission.
-
----
-
-**Author:** Sejal Singh
-**MAIL ID:**sejalsingh910@gmail.com
-
-
+👤 Author
+Sejal Singh
+📧 Email: sejalsingh910@gmail.com
+🌐 GitHub: https://github.com/SSR1516
