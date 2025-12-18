@@ -1,84 +1,75 @@
 import pandas as pd
+import os
 import re
 
-# ---------- helpers ----------
+DATA_PATH = "data/processed/shl_assessments.csv"
 
-def keyword_score(row, query_words):
-    text = f"{row['name']} {row.get('description','')}".lower()
-    return sum(1 for w in query_words if w in text)
-
-
-def detect_domains(query):
-    tech_keywords = [
-        "java", "python", "developer", "software", "cloud", "sql",
-        "engineering", "programming", "coding", "devops"
-    ]
-    soft_keywords = [
-        "collaboration", "teamwork", "communication",
-        "leadership", "adaptability", "motivation"
-    ]
-
-    q = query.lower()
-    return {
-        "tech": any(k in q for k in tech_keywords),
-        "soft": any(k in q for k in soft_keywords)
-    }
+def clean_text(text: str) -> str:
+    if not isinstance(text, str):
+        return ""
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    return text
 
 
-# ---------- MAIN FUNCTION (DO NOT CHANGE SIGNATURE) ----------
+def recommend_assessments(query: str, top_k: int = 10):
+    # ---------- SAFETY ----------
+    if not query or not isinstance(query, str):
+        return []
 
-def recommend_assessments(query: str, df: pd.DataFrame, k: int = 10):
-    """
-    API compliant recommender
-    Returns:
-    [
-      {"name": "...", "url": "..."},
-      ...
-    ]
-    """
+    if not os.path.exists(DATA_PATH):
+        print("❌ CSV not found:", DATA_PATH)
+        return []
 
-    tokens = re.findall(r"\w+", query.lower())
-    query_words = [t for t in tokens if len(t) > 2]
+    try:
+        df = pd.read_csv(DATA_PATH, encoding="utf-8", errors="ignore")
+    except Exception as e:
+        print("❌ CSV load error:", e)
+        return []
 
-    domains = detect_domains(query)
+    if df.empty:
+        print("❌ CSV empty")
+        return []
 
+    # ---------- PREPROCESS ----------
     df = df.copy()
-    df["score"] = df.apply(lambda r: keyword_score(r, query_words), axis=1)
+    df["combined"] = (
+        df["name"].fillna("") + " " + df["description"].fillna("")
+    ).apply(clean_text)
 
-    df = df.sort_values("score", ascending=False).reset_index(drop=True)
+    query_clean = clean_text(query)
+    query_tokens = set(query_clean.split())
 
-    if df["score"].max() == 0:
-        df["score"] = 1  # fallback
+    # ---------- SCORING ----------
+    scores = []
+    for _, row in df.iterrows():
+        text_tokens = set(row["combined"].split())
+        score = len(query_tokens.intersection(text_tokens))
+        scores.append(score)
 
+    df["score"] = scores
+    df = df[df["score"] > 0]
+
+    if df.empty:
+        return []
+
+    df = df.sort_values("score", ascending=False).head(top_k)
+
+    # ---------- RESPONSE ----------
     results = []
+    for _, row in df.iterrows():
+        results.append({
+            "name": row.get("name", ""),
+            "url": row.get("url", ""),
+            "description": row.get("description", ""),
+            "duration": int(row["duration"]) if str(row.get("duration")).isdigit() else None,
+            "remote_support": str(row.get("remote_support", "Unknown")),
+            "adaptive_support": str(row.get("adaptive_support", "Unknown")),
+            "test_type": (
+                row.get("test_type").split(",")
+                if isinstance(row.get("test_type"), str)
+                else []
+            )
+        })
 
-    if domains["tech"] and domains["soft"]:
-        tech_df = df[df["test_type"].str.contains("K", na=False)]
-        soft_df = df[df["test_type"].str.contains("P", na=False)]
-
-        n_each = max(1, k // 3)
-
-        picks = (
-            tech_df.head(n_each).to_dict("records") +
-            soft_df.head(n_each).to_dict("records")
-        )
-
-        seen = set(p["url"] for p in picks)
-
-        for _, r in df.iterrows():
-            if len(picks) >= k:
-                break
-            if r["url"] not in seen:
-                picks.append(r.to_dict())
-                seen.add(r["url"])
-
-        results = picks
-
-    else:
-        results = df.head(k).to_dict("records")
-
-    # -------- API OUTPUT (STRICT) --------
-    return [
-        {"name": r["name"], "url": r["url"]}
-        for r in results[:k]
-    ]
+    return results
