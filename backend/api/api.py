@@ -1,57 +1,62 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
-import pandas as pd
-import sys
-import os
-
-# allow backend imports
-sys.path.append(os.path.abspath("."))
 
 from backend.core.recommender import recommend_assessments
 
-app = FastAPI(title="SHL Assessment Recommendation API")
+# ================= APP INIT =================
+app = FastAPI(
+    title="SHL Assessment Recommendation API",
+    description="API to recommend SHL assessments based on hiring requirements",
+    version="1.0.0"
+)
 
-DATA_PATH = "data/processed/shl_assessments.csv"
+# ================= CORS =================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # allow Streamlit, browser, Render
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-
-# ---------- Schemas (PDF Appendix-2 compliant) ----------
-
-class RecommendRequest(BaseModel):
+# ================= REQUEST MODEL =================
+class RecommendationRequest(BaseModel):
     query: str
     k: int = 10
 
 
+# ================= RESPONSE MODEL =================
 class AssessmentResponse(BaseModel):
     name: str
     url: str
+    description: str
+    duration: int | None
+    remote_support: str
+    adaptive_support: str
+    test_type: List[str]
 
 
-class RecommendResponse(BaseModel):
-    recommendations: List[AssessmentResponse]
+# ================= HEALTH CHECK =================
+@app.get("/")
+def root():
+    return {"status": "SHL Recommendation API is running"}
 
-
-# ---------- Endpoints ----------
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "OK"}
 
 
-@app.post("/recommend", response_model=RecommendResponse)
-def recommend(req: RecommendRequest):
-
-    df = pd.read_csv(DATA_PATH)
-
-    results = recommend_assessments(
-        query=req.query,
-        df=df,
-        k=req.k
+# ================= RECOMMEND ENDPOINT =================
+@app.post("/recommend", response_model=List[AssessmentResponse])
+def recommend(request: RecommendationRequest):
+    """
+    Takes a hiring requirement (query) and returns top-k recommended SHL assessments
+    """
+    recommendations = recommend_assessments(
+        query=request.query,
+        top_k=request.k
     )
-
-    response = [
-        {"name": r["name"], "url": r["url"]}
-        for r in results
-    ]
-
-    return {"recommendations": response}
+    return recommendations
