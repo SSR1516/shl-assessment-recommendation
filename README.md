@@ -38,7 +38,7 @@ Copy code
 
 ## 🧠 System Architecture
 
-![System Architecture](architecture_flow_diagram.png)
+![System Architecture](docs/system_architecture.png)
 
 ### High-Level Flow
 1. SHL catalog is scraped and structured
@@ -206,3 +206,4 @@ Sejal Singh
 📧 Email: sejalsingh910@gmail.com
 
 🌐 GitHub: https://github.com/SSR1516
+
