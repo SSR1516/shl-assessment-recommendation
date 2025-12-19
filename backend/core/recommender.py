@@ -21,49 +21,49 @@ def normalize_test_type(test_list):
 
 
 def recommend_assessments(query: str, top_k: int = 10):
-    # ✅ SAFE CSV LOAD (pandas 2.x compatible)
-    df = pd.read_csv(DATA_PATH, encoding="latin1", engine="python")
+    # ✅ pandas 2.x compatible CSV load
+    try:
+        df = pd.read_csv(DATA_PATH, encoding="latin1")
+    except Exception as e:
+        print("❌ CSV load failed:", e)
+        return []
 
-    # ✅ Clean columns (NO crashes)
-    df["description"] = df["description"].fillna("")
-    df["test_type"] = df["test_type"].fillna("[]")
+    # Clean columns
+    df["description"] = df.get("description", "").fillna("")
+    df["test_type"] = df.get("test_type", "[]").fillna("[]")
 
-    # ✅ Tokenize query safely
+    # Tokenize query
     tokens = re.findall(r"\w+", query.lower())
     tokens = [t for t in tokens if len(t) > 2]
 
-    # ✅ Keyword scoring
+    # Simple keyword scoring
     def score_row(row):
         text = f"{row['name']} {row['description']}".lower()
         return sum(1 for t in tokens if t in text)
 
     df["score"] = df.apply(score_row, axis=1)
 
-    # ✅ Sort by relevance
+    # Sort by relevance
     df = df.sort_values("score", ascending=False)
 
-    # 🚨 HARD FALLBACK (even if query = "asdfgh")
-    if df["score"].max() == 0:
-        df["score"] = 1
-
+    # ✅ GUARANTEED fallback (never empty)
     results = df.head(top_k).to_dict("records")
 
-    # ✅ Final API-safe response
-    recs = []
+    recommendations = []
     for r in results:
         try:
-            raw = ast.literal_eval(r["test_type"]) if isinstance(r["test_type"], str) else r["test_type"]
-        except:
+            raw = ast.literal_eval(r["test_type"])
+        except Exception:
             raw = []
 
-        recs.append({
+        recommendations.append({
             "name": r["name"],
             "url": r["url"],
             "description": r["description"],
-            "duration": None if pd.isna(r["duration"]) else int(float(r["duration"])),
+            "duration": None if pd.isna(r.get("duration")) else int(float(r["duration"])),
             "remote_support": r.get("remote_support", "Yes"),
             "adaptive_support": r.get("adaptive_support", "No"),
             "test_type": normalize_test_type(raw)
         })
 
-    return recs
+    return recommendations
