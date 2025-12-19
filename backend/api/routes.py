@@ -1,17 +1,14 @@
 from fastapi import APIRouter
-from backend.models.schema import (
-    RecommendationRequest,
-    RecommendationResponse
-)
+from pydantic import BaseModel
 from backend.core.recommender import recommend_assessments
 
 router = APIRouter()
 
-@router.get("/health")
-def health():
-    return {"status": "healthy"}
+class QueryRequest(BaseModel):
+    query: str
+    k: int = 10
 
-@router.post("/recommend", response_model=RecommendationResponse)
-def recommend(request: RecommendationRequest):
-    results = recommend_assessments(request.query)
-    return {"recommended_assessments": results}
+@router.post("/recommend")
+def recommend(req: QueryRequest):
+    results = recommend_assessments(req.query, req.k)
+    return results
