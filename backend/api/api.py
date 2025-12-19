@@ -12,7 +12,7 @@ class RecommendRequest(BaseModel):
 
 @app.get("/")
 def root():
-    return {"message": "SHL Assessment Recommendation API is running"}
+    return {"message": "API running"}
 
 
 @app.get("/health")
