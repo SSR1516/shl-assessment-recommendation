@@ -1,7 +1,8 @@
 import streamlit as st
 import requests
 
-API_URL = "http://127.0.0.1:8000/recommend"
+API_URL = "https://shl-assessment-recommendation.onrender.com/recommend"
+
 
 st.set_page_config(page_title="SHL Assessment Recommender", layout="centered")
 
@@ -33,5 +34,5 @@ if st.button("Get Recommendations"):
                         f"**{i}. {rec['name']}**  \n"
                         f"[Open Assessment]({rec['url']})"
                     )
-            else:
+            els e:
                 st.error("API error. Please try again.")
