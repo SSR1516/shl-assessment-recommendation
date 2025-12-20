@@ -2,61 +2,26 @@ import streamlit as st
 import requests
 import time
 
-API_URL = " https://shl-assessment-recommendation-mx8m.onrender.com"
-st.set_page_config(page_title="SHL Assessment Recommender", layout="centered")
-
-
-BASE_URL = " https://shl-assessment-recommendation-mx8m.onrender.com" 
+# 🔗 LIVE BACKEND URL (Render)
+BASE_URL = "https://shl-assessment-recommendation-mx8m.onrender.com"
+API_URL = f"{BASE_URL}/recommend"
+HEALTH_URL = f"{BASE_URL}/health"
 
 st.set_page_config(
-    page_title="SHL Assessment Recommendation System",
+    page_title="SHL Assessment Recommender",
     layout="centered"
 )
 
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: #f5f7fa;
-    }
-    .main-title {
-        font-size: 32px;
-        font-weight: 700;
-        color: #002b5c;
-        text-align: center;
-    }
-    .subtitle {
-        font-size: 16px;
-        color: #4f5d75;
-        text-align: center;
-        margin-bottom: 30px;
-    }
-    .card {
-        background-color: white;
-        padding: 18px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        border-left: 6px solid #002b5c;
-        box-shadow: 0px 2px 8px rgba(0,0,0,0.05);
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.title("🔍 SHL Assessment Recommendation System")
 
-st.markdown('<div class="main-title">SHL Assessment Recommendation System</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">AI-powered recommendations for selecting the right SHL assessments</div>',
-    unsafe_allow_html=True
+    "Enter a hiring requirement or job description to get the most relevant "
+    "SHL assessment recommendations."
 )
-
-# ==============================
-# INPUT SECTION
-# ==============================
 
 query = st.text_area(
-    "Hiring requirement / Job description",
-    placeholder="e.g. Looking for Java developers with strong collaboration and problem-solving skills"
+    "Hiring requirement / Job description:",
+    placeholder="e.g. Looking for Java developers with teamwork and communication skills"
 )
 
 k = st.slider(
@@ -66,37 +31,30 @@ k = st.slider(
     value=10
 )
 
-# ==============================
-# BACKEND WARM-UP
-# ==============================
-
+# ---------- Helper: Wake up backend ----------
 def warm_up_backend():
     try:
         requests.get(HEALTH_URL, timeout=15)
         time.sleep(1)
         return True
-    except:
+    except Exception:
         return False
 
 
-# ==============================
-# ACTION
-# ==============================
-
 if st.button("Get Recommendations"):
     if not query.strip():
-        st.warning("Please enter a valid hiring requirement.")
+        st.warning("Please enter a query.")
     else:
-        with st.spinner("Connecting to SHL recommendation service..."):
+        with st.spinner("Connecting to recommendation service..."):
             backend_ready = warm_up_backend()
 
         if not backend_ready:
             st.error(
-                "Backend service is waking up (Render cold start). "
+                "Backend service is waking up. "
                 "Please wait a few seconds and try again."
             )
         else:
-            with st.spinner("Generating recommendations..."):
+            with st.spinner("Fetching recommendations..."):
                 try:
                     response = requests.post(
                         API_URL,
@@ -105,40 +63,29 @@ if st.button("Get Recommendations"):
                     )
 
                     if response.status_code == 200:
-                        results = response.json().get("recommendations", [])
+                        data = response.json().get("recommendations", [])
 
-                        if not results:
-                            st.info("No suitable assessments found.")
+                        if not data:
+                            st.info("No recommendations found for this query.")
                         else:
-                            st.success("Recommended SHL Assessments")
-                            for i, rec in enumerate(results, start=1):
+                            st.success("Recommended SHL Assessments:")
+                            for i, rec in enumerate(data, start=1):
                                 st.markdown(
-                                    f"""
-                                    <div class="card">
-                                        <b>{i}. {rec.get("name","")}</b><br>
-                                        <a href="{rec.get("url","")}" target="_blank">
-                                            View Assessment
-                                        </a>
-                                    </div>
-                                    """,
-                                    unsafe_allow_html=True
+                                    f"**{i}. {rec.get('name','')}**  \n"
+                                    f"[Open Assessment]({rec.get('url','')})"
                                 )
-
                     else:
-                        st.error("API returned an error. Please try again later.")
+                        st.error(
+                            f"API error ({response.status_code}). "
+                            "Please try again later."
+                        )
 
                 except requests.exceptions.Timeout:
-                    st.error("Request timed out. Backend may still be waking up.")
+                    st.error("Request timed out. Backend may be waking up.")
                 except requests.exceptions.ConnectionError:
-                    st.error("Unable to connect to backend service.")
+                    st.error(
+                        "Cannot connect to backend service. "
+                        "Please try again in a moment."
+                    )
                 except Exception as e:
                     st.error(f"Unexpected error: {e}")
-
-# ==============================
-# FOOTER
-# ==============================
-
-st.markdown(
-    "<hr><center><small>Powered by SHL Assessment Recommendation System</small></center>",
-    unsafe_allow_html=True
-)
