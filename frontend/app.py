@@ -4,7 +4,6 @@ import time
 
 API_URL = "https://shl-assessment-recommendation-mx8m.onrender.com"
 st.set_page_config(page_title="SHL Assessment Recommender", layout="centered")
->>>>>>> c038f3a45c97e5425400b7403f1e30d1c6747c1e
 
 st.title("🔍 SHL Assessment Recommendation System")
 
