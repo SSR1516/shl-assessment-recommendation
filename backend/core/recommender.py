@@ -1,69 +1,72 @@
 import pandas as pd
 import re
-import ast
-
-DATA_PATH = "data/processed/shl_assessments.csv"
-
-TEST_TYPE_MAP = {
-    "K": "Knowledge & Skills",
-    "P": "Personality & Behavior",
-    "A": "Ability & Aptitude",
-    "S": "Simulation",
-    "B": "Behavioral",
-    "C": "Competency",
-    "D": "Development",
-    "E": "Exercise"
-}
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 
-def normalize_test_type(test_list):
-    return [TEST_TYPE_MAP[c] for c in test_list if c in TEST_TYPE_MAP]
+def tokenize(text):
+    return re.findall(r"\w+", text.lower())
 
 
-def recommend_assessments(query: str, top_k: int = 10):
-    # ✅ pandas 2.x compatible CSV load
-    try:
-        df = pd.read_csv(DATA_PATH, encoding="latin1")
-    except Exception as e:
-        print("❌ CSV load failed:", e)
-        return []
+def detect_domains(query):
+    tech = ["java", "python", "developer", "software", "sql", "cloud"]
+    soft = ["communication", "collaboration", "teamwork", "leadership"]
 
-    # Clean columns
-    df["description"] = df.get("description", "").fillna("")
-    df["test_type"] = df.get("test_type", "[]").fillna("[]")
+    q = query.lower()
+    return {
+        "tech": any(t in q for t in tech),
+        "soft": any(s in q for s in soft)
+    }
 
-    # Tokenize query
-    tokens = re.findall(r"\w+", query.lower())
-    tokens = [t for t in tokens if len(t) > 2]
 
-    # Simple keyword scoring
-    def score_row(row):
-        text = f"{row['name']} {row['description']}".lower()
-        return sum(1 for t in tokens if t in text)
+def recommend_assessments(query: str, df: pd.DataFrame, k: int = 10):
+    df = df.copy()
 
-    df["score"] = df.apply(score_row, axis=1)
+    # ---------- TF-IDF ----------
+    corpus = (
+        df["name"].fillna("") + " " +
+        df["description"].fillna("") + " " +
+        df["test_type"].fillna("")
+    ).tolist()
 
-    # Sort by relevance
+    vectorizer = TfidfVectorizer(stop_words="english")
+    X = vectorizer.fit_transform(corpus)
+    q_vec = vectorizer.transform([query])
+
+    scores = cosine_similarity(q_vec, X)[0]
+    df["score"] = scores
+
     df = df.sort_values("score", ascending=False)
 
-    # ✅ GUARANTEED fallback (never empty)
-    results = df.head(top_k).to_dict("records")
+    # ---------- K/P BALANCE ----------
+    domains = detect_domains(query)
+    results = []
 
-    recommendations = []
-    for r in results:
-        try:
-            raw = ast.literal_eval(r["test_type"])
-        except Exception:
-            raw = []
+    if domains["tech"] and domains["soft"]:
+        k_df = df[df["test_type"].str.contains("K", na=False)]
+        p_df = df[df["test_type"].str.contains("P", na=False)]
 
-        recommendations.append({
-            "name": r["name"],
-            "url": r["url"],
-            "description": r["description"],
-            "duration": None if pd.isna(r.get("duration")) else int(float(r["duration"])),
+        results = (
+            k_df.head(k // 2).to_dict("records") +
+            p_df.head(k // 2).to_dict("records")
+        )
+
+        if len(results) < k:
+            results += df.head(k - len(results)).to_dict("records")
+    else:
+        results = df.head(k).to_dict("records")
+
+    # ---------- SAFE OUTPUT ----------
+    final = []
+    for r in results[:k]:
+        final.append({
+            "name": r.get("name", ""),
+            "url": r.get("url", ""),
+            "description": r.get("description", ""),
+            "duration": int(r["duration"]) if pd.notna(r.get("duration")) else 0,
             "remote_support": r.get("remote_support", "Yes"),
             "adaptive_support": r.get("adaptive_support", "No"),
-            "test_type": normalize_test_type(raw)
+            "test_type": [r.get("test_type")] if pd.notna(r.get("test_type")) else []
         })
 
-    return recommendations
+    return final
