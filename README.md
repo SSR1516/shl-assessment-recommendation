@@ -45,20 +45,23 @@ The following diagram illustrates the end-to-end architecture of the SHL Assessm
 ## 🏗️ System Flow
 
 The system follows a clean, modular architecture where each component has a well-defined responsibility.
----
-User
- │
- ▼
-Web Interface (Streamlit)
- │
- ▼
-Recommendation API (FastAPI)
- │
- ▼
-Text Matching Engine (TF-IDF + Similarity)
- │
- ▼
-SHL Assessment Catalog
+## 🧠 System Architecture Flow
+
+```text
+User (Browser)
+     |
+     v
+Streamlit Frontend (UI)
+     |
+     v
+FastAPI Backend (Hosted on Render)
+     |
+     v
+TF-IDF Vector Recommender Engine
+     |
+     v
+SHL Assessment Catalog (CSV Dataset)
+
 
 
 ## ⚙️ Technology Stack
@@ -122,39 +125,33 @@ These results highlight the need for semantic embeddings in future iterations.
 
 ## 📁 Project Structure
 
-shl-assessment-recommendation/
-│
-├── frontend/
-│   └── app.py                  # Streamlit web interface
+```bash
+shl-assessment-recommendation-system/
 │
 ├── backend/
 │   ├── api/
-│   │   └── app.py              # FastAPI endpoints
+│   │   └── app.py                # FastAPI application entry point
 │   │
 │   └── core/
-│       └── recommender.py      # Recommendation logic (TF-IDF + similarity)
+│       └── recommender.py        # TF-IDF recommendation logic
 │
-├── data/
-│   ├── processed/
-│   │   └── shl_assessments.csv # SHL assessment catalog
-│   │
-│   └── evaluation/
-│       ├── train.csv
-│       ├── test.csv
-│       └── submission.csv
+├── frontend/
+│   └── app.py                    # Streamlit frontend UI
 │
 ├── experiments/
-│   ├── evaluate.py             # Recall@K evaluation
-│   └── generate_submission.py  # Submission file generator
+│   ├── evaluate.py               # Model evaluation script
+│   └── generate_submission.py    # Submission file generator
+│
+├── data/
+│   ├── processed/                # Cleaned SHL assessment data
+│   └── evaluation/               # Train / test datasets
 │
 ├── docs/
-│   ├── approach.md             # Detailed approach explanation
-│   └── system_architecture.png # Architecture diagram
+│   └── approach.md               # Solution approach & methodology
 │
-├── requirements.txt            # Project dependencies
-├── runtime.txt                 # Python version for deployment
-└── README.md                   # Project documentation
-
+├── requirements.txt              # Python dependencies
+├── runtime.txt                   # Python runtime version (Render)
+└── README.md                     # Project documentation
 ---
 
 ## ▶️ Running Locally
