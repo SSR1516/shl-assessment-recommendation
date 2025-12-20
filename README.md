@@ -130,12 +130,14 @@ shl-assessment-recommendation/
 ├── backend/
 │   ├── api/
 │   │   └── app.py              # FastAPI endpoints
+│   │
 │   └── core/
 │       └── recommender.py      # Recommendation logic (TF-IDF + similarity)
 │
 ├── data/
 │   ├── processed/
 │   │   └── shl_assessments.csv # SHL assessment catalog
+│   │
 │   └── evaluation/
 │       ├── train.csv
 │       ├── test.csv
@@ -149,13 +151,9 @@ shl-assessment-recommendation/
 │   ├── approach.md             # Detailed approach explanation
 │   └── system_architecture.png # Architecture diagram
 │
-├── assets/
-│   └── system_architecture.png # Architecture diagram (UI reference)
-│
 ├── requirements.txt            # Project dependencies
 ├── runtime.txt                 # Python version for deployment
-└── README.md                   # Project documentatio
-
+└── README.md                   # Project documentation
 
 ---
 
