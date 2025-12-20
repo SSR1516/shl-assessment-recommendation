@@ -2,22 +2,16 @@ import streamlit as st
 import requests
 import time
 
-# ==============================
-# CONFIG
-# ==============================
+API_URL = " https://shl-assessment-recommendation-mx8m.onrender.com"
+st.set_page_config(page_title="SHL Assessment Recommender", layout="centered")
 
-BASE_URL = " https://shl-assessment-recommendation-mx8m.onrender.com"  # 🔴 friend yahan apna Render URL daale
-API_URL = f"{BASE_URL}/recommend"
-HEALTH_URL = f"{BASE_URL}/health"
+
+BASE_URL = " https://shl-assessment-recommendation-mx8m.onrender.com" 
 
 st.set_page_config(
     page_title="SHL Assessment Recommendation System",
     layout="centered"
 )
-
-# ==============================
-# SHL-LIKE STYLING
-# ==============================
 
 st.markdown(
     """
@@ -49,10 +43,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-# ==============================
-# HEADER
-# ==============================
 
 st.markdown('<div class="main-title">SHL Assessment Recommendation System</div>', unsafe_allow_html=True)
 st.markdown(
