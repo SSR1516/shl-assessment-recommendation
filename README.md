@@ -10,6 +10,9 @@ The system is built as an end-to-end application with a backend recommendation A
 
 ### 🔹 Web Application (Frontend)
 👉 https://shl-assessment-recommendation-mx8m.onrender.com/
+### 🔹 Backend API (FastAPI – Render)
+- Health Check:  
+  👉  https://shl-assessment-recommendation-mx8m.onrender.com
 
 ---
 
@@ -143,15 +146,15 @@ shl-assessment-recommendation/
 │   └── generate_submission.py  # Submission file generator
 │
 ├── docs/
-│   └── approach.md             # Detailed approach explanation
+│   ├── approach.md             # Detailed approach explanation
+│   └── system_architecture.png # Architecture diagram
 │
 ├── assets/
-│   └── system_architecture.png # Architecture diagram
+│   └── system_architecture.png # Architecture diagram (UI reference)
 │
 ├── requirements.txt            # Project dependencies
 ├── runtime.txt                 # Python version for deployment
-└── README.md                   # Project documentation
-
+└── README.md                   # Project documentatio
 
 
 ---
