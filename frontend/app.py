@@ -2,15 +2,9 @@ import streamlit as st
 import requests
 import time
 
-# 🔗 LIVE BACKEND URL (Render)
-BASE_URL = "https://shl-assessment-recommendation-mx8m.onrender.com"
-API_URL = f"{BASE_URL}/recommend"
-HEALTH_URL = f"{BASE_URL}/health"
-
-st.set_page_config(
-    page_title="SHL Assessment Recommender",
-    layout="centered"
-)
+API_URL = "https://shl-assessment-recommendation-mx8m.onrender.com"
+st.set_page_config(page_title="SHL Assessment Recommender", layout="centered")
+>>>>>>> c038f3a45c97e5425400b7403f1e30d1c6747c1e
 
 st.title("🔍 SHL Assessment Recommendation System")
 
