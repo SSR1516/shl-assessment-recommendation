@@ -12,7 +12,7 @@ st.set_page_config(
     layout="centered"
 )
 
-st.title("🔍 SHL Assessment Recommendation System")
+st.title("🧠 SHL Assessment Recommendation System")
 
 st.markdown(
     "Enter a hiring requirement or job description to get the most relevant "
