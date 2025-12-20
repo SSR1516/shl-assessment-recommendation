@@ -9,7 +9,7 @@ The system is built as an end-to-end application with a backend recommendation A
 ## 🚀 Live Application
 
 ### 🔹 Web Application (Frontend)
-👉 https://shl-assessment-recommendation-mx8m.onrender.com/
+👉 [Frontend](https://shl-assessment-recommendation-amhefuwzdsvhfnywszyhxt.streamlit.app/)
 ### 🔹 Backend API (FastAPI – Render)
 - Health Check:  
   👉  https://shl-assessment-recommendation-mx8m.onrender.com
