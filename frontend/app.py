@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import time
 
-API_URL = "https://shl-assessment-recommendation-mx8m.onrender.com"
+API_URL = " https://shl-assessment-recommendation-mx8m.onrender.com"
 st.set_page_config(page_title="SHL Assessment Recommender", layout="centered")
 
 st.title("🔍 SHL Assessment Recommendation System")
